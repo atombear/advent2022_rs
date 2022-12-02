@@ -1,12 +1,8 @@
-use std::fs::{File};
-use std::io::{self, BufRead};
-use std::path::Path;
 use std::cmp::{max};
+use std::path::PathBuf;
 
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
-    let file = File::open(filename)?;
-    Ok(io::BufReader::new(file).lines())
-}
+use crate::utils::read_lines;
+
 
 fn update_triple(triple: &mut Vec<u64>, bag: u64) {
     if bag >= triple[0] {
@@ -22,9 +18,12 @@ fn update_triple(triple: &mut Vec<u64>, bag: u64) {
 }
 
 pub fn problem() -> (u64, u64) {
-    let mut data_path = env!("CARGO_MANIFEST_DIR").to_owned();
-    data_path.push_str("/src");
-    data_path.push_str("/input1.txt");
+    let data_dir = env!("CARGO_MANIFEST_DIR").to_owned();
+    let data_path: PathBuf = [
+        data_dir,
+        "src".to_string(),
+        "input1.txt".to_string()
+    ].iter().collect();
 
     let mut max_calories: u64 = 0;
     let mut max_triple: Vec<u64> = vec![0,0,0];
