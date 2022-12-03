@@ -64,10 +64,10 @@ pub fn problem() -> (u64, u64) {
 
     if let Ok(lines) = read_lines(data_path) {
         for line in lines {
-            if let Ok(num_str) = line {
+            if let Ok(game) = line {
 
-                let p0 = num_str.chars().nth(0).unwrap();
-                let p1 = num_str.chars().nth(2).unwrap();
+                let p0 = game.chars().nth(0).unwrap();
+                let p1 = game.chars().nth(2).unwrap();
 
                 score0 += get_score0(p0, p1);
 
