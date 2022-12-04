@@ -2,10 +2,15 @@ mod utils;
 mod problem20221201;
 mod problem20221202;
 mod problem20221203;
+mod problem20221204;
 
 fn main() {
-    println!("{:?}", problem20221201::problem());
-    println!("{:?}", problem20221202::problem());
-    println!("{:?}", problem20221203::problem());
-
+    for daily_fn in [
+        problem20221201::problem,
+        problem20221202::problem,
+        problem20221203::problem,
+        problem20221204::problem,
+    ] {
+        println!("{:?}", daily_fn());
+    }
 }
