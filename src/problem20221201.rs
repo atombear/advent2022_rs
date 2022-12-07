@@ -17,7 +17,7 @@ fn update_triple(triple: &mut Vec<u64>, bag: u64) {
     }
 }
 
-pub fn problem() -> (u64, u64) {
+pub fn problem() -> (usize, u64, u64) {
     let data_dir = env!("CARGO_MANIFEST_DIR").to_owned();
     let data_path: PathBuf = [
         data_dir,
@@ -44,5 +44,5 @@ pub fn problem() -> (u64, u64) {
     }
     update_triple(&mut max_triple, bag);
     max_calories = max(max_calories, bag);
-    return (max_calories, max_triple.iter().sum())
+    return (0, max_calories, max_triple.iter().sum())
 }

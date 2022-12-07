@@ -9,7 +9,7 @@ fn get_bounds(s: &str) -> (u64, u64) {
 }
 
 
-pub fn problem() -> (u64, u64) {
+pub fn problem() -> (usize, u64, u64) {
     let data_dir = env!("CARGO_MANIFEST_DIR").to_owned();
     let data_path: PathBuf = [
         data_dir,
@@ -40,5 +40,5 @@ pub fn problem() -> (u64, u64) {
         }
     }
 
-    return (redundant, more_redundant)
+    return (3, redundant, more_redundant)
 }
