@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 use std::collections::HashMap;
 
-use crate::utils::read_lines;
-
 use fancy_regex::Regex;
+
+use crate::utils::read_lines;
 
 // state machine
 #[derive(PartialEq)]
