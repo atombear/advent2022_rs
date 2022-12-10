@@ -17,7 +17,7 @@ fn complete_cycle(cycle_params: &mut CycleParams,
     let mut crt = crt;
 
     crt.push(
-        if [cycle_params.sum - 1, cycle_params.sum + 1, cycle_params.sum].contains(&pixel) { '#' } else { '.' }
+        if [-1, 1, 0].contains(&(pixel - cycle_params.sum)) { '#' } else { '.' }
     );
 
     cycle_params.num += 1;
