@@ -40,7 +40,7 @@ fn get_scenic_score(trees: &Vec<Vec<u64>>, idx: usize, jdx: usize) -> u64 {
             }
         }
         scenic_score *= delta;
-        
+
         delta = 1;
         while trees[idx][jdx - delta as usize] < h {
             delta += 1;
