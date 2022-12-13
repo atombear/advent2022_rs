@@ -20,24 +20,25 @@ enum Order {
 
 
 fn nlist_from_str(str: &String) -> NList<u64> {
-    let mut list: Vec<NList<u64>> = vec![];
-    for el in get_elements(&open_list(&str)) {
-        if is_int(&el) {
-            list.push(NList::El(el.parse::<u64>().unwrap()));
-        } else {
-            list.push(nlist_from_str(&el));
-        }
-    }
-    return NList::List(list)
+    return NList::List(
+        get_elements(&open_list(&str)).iter().map(|el|
+            if is_int(&el) {
+                NList::El(el.parse::<u64>().unwrap())
+            } else {
+                nlist_from_str(&el)
+            }).collect()
+    )
 }
 
 
+// remove brackets
 fn open_list(str: &String) -> String {
     if str.len() == 0 { return str.to_owned() }
     return if str[0..1] != "[".to_string() { str.to_owned() } else { str[1..str.len() - 1].to_owned() }
 }
 
 
+// elements of a csv
 fn get_elements(str: &String) -> Vec<String> {
     let mut num_brackets: u64 = 0;
     let mut ret: Vec<String> = vec![];
@@ -141,25 +142,25 @@ pub fn problem() -> (usize, u64, u64) {
     if let Ok(lines) = read_lines(data_path) {
         for (idx, line) in lines.enumerate() {
             if let Ok(str_var) = line {
-                let copy = str_var.to_owned();
-                if idx % 3 == 0 { left_str = str_var; all_packets.push(copy); }
-                else if idx % 3 == 1 { right_str = str_var; all_packets.push(copy); }
-                else {
-                    match compare(&left_str, &right_str) {
+
+                let str_var_copy = str_var.to_owned();
+
+                if idx % 3 == 0 { left_str = str_var; all_packets.push(str_var_copy); }
+                else if idx % 3 == 1 { right_str = str_var; all_packets.push(str_var_copy); }
+                else { match compare(&left_str, &right_str) {
                         Order::Right => { result += 1 + (idx as u64 / 3); },
                         _ => {},
-                    }
-                }
+                } }
             }
         }
     }
 
     let mut all_packets_nlist: Vec<NList<u64>> = all_packets.iter().map(nlist_from_str).collect();
+    all_packets_nlist.sort_by(compare_nlist_ord);
 
     let dpac0: NList<u64> = nlist_from_str(&"[[2]]".to_string());
     let dpac1: NList<u64> = nlist_from_str(&"[[6]]".to_string());
 
-    all_packets_nlist.sort_by(|x, y| compare_nlist_ord(x, y));
     let decoder_key: u64 = all_packets_nlist.iter().enumerate()
         .filter(
             |(_, p)| **p == dpac0 || **p == dpac1
