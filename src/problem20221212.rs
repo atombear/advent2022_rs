@@ -10,10 +10,8 @@ type Point = (usize, usize);
 
 
 fn index(word: String, search: char) -> Option<usize> {
-    for (idx, c) in word.chars().enumerate() {
-        if c == search {
-            return Some(idx)
-        }
+    for (idx, _) in word.chars().enumerate().filter(|(_, c)| c == &search) {
+        return Some(idx)
     }
     return None
 }
@@ -30,7 +28,6 @@ fn get_adj_points(pt: Point, map: &Vec<Vec<char>>) -> Vec<Point> {
     (r, c) = pt;
     let rows = map.len();
     let cols = map[0].len();
-    let val = char_to_height(map[r][c]);
 
     let mut all_points: Vec<Point> = vec![];
     if r > 0 { all_points.push((r-1, c)) };
@@ -40,11 +37,9 @@ fn get_adj_points(pt: Point, map: &Vec<Vec<char>>) -> Vec<Point> {
 
     let mut ret : Vec<Point> = vec![];
 
-    for (new_r, new_c) in all_points {
-        let new_val = char_to_height(map[new_r][new_c]);
-        if val + 1 >= new_val {
-            ret.push((new_r, new_c));
-        }
+    let val = char_to_height(map[r][c]);
+    for (new_r, new_c) in all_points.iter().filter(|(new_r, new_c)| val + 1 >= char_to_height(map[*new_r][*new_c])) {
+        ret.push((*new_r, *new_c));
     }
 
     return ret
