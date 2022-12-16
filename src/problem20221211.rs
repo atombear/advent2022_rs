@@ -139,16 +139,16 @@ pub fn problem() -> (usize, u64, u64) {
         for line in lines {
             if let Ok(line) = line {
                 if line.contains("divisible by ") {
-                    mods.push(line.split("divisible by ").collect::<Vec<&str>>()[1].parse().unwrap());
+                    mods.push(line.split("divisible by ").nth(1).unwrap().parse().unwrap());
                 }
                 if line.contains("If true: throw to monkey ") {
-                    throw_true.push(line.split("If true: throw to monkey ").collect::<Vec<&str>>()[1].parse().unwrap());
+                    throw_true.push(line.split("If true: throw to monkey ").nth(1).unwrap().parse().unwrap());
                 }
                 if line.contains("If false: throw to monkey ") {
-                    throw_false.push(line.split("If false: throw to monkey ").collect::<Vec<&str>>()[1].parse().unwrap());
+                    throw_false.push(line.split("If false: throw to monkey ").nth(1).unwrap().parse().unwrap());
                 }
                 if line.contains("Starting items: ") {
-                    let csv: Vec<u64> = line.split("Starting items: ").collect::<Vec<&str>>()[1].split(&",").map(|x|strip_and_parse(x)).collect();
+                    let csv: Vec<u64> = line.split("Starting items: ").nth(1).unwrap().split(&",").map(|x|strip_and_parse(x)).collect();
                     init_vals.push(csv);
                 }
             }
