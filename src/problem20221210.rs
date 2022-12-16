@@ -51,7 +51,7 @@ pub fn problem() -> (usize, i64, String) {
 
                 if op != "noop" {
                     assert!(op.contains("addx"));
-                    val = op.split(' ').collect::<Vec<&str>>()[1].parse::<i64>().unwrap();
+                    val = op.split(' ').nth(1).unwrap().parse::<i64>().unwrap();
                     crt = complete_cycle(&mut cycle_params, val, crt);
                 }
             }

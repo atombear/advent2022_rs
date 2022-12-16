@@ -74,7 +74,7 @@ pub fn problem() -> (usize, u64, u64) {
     if let Ok(lines) = read_lines(data_path) {
         for line in lines {
             if let Ok(mv_instr) = line {
-                let dir_dist: Vec<&str> = mv_instr.split(" ").collect::<Vec<&str>>();
+                let dir_dist: Vec<&str> = mv_instr.split(" ").collect();
 
                 dir = dir_dist[0];
                 dist = dir_dist[1].parse::<u64>().unwrap();
