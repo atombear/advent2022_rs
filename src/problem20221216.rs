@@ -161,7 +161,7 @@ pub fn problem() -> (usize, u64, u64) {
             val /= 2;
         }
 
-        if activated_e.len() - activated_h.len() == 1 {
+        if activated_e.len() - activated_h.len() < 2 {
             let flow_h = find_max_flow(
                 26,
                 "AA".to_string(),
