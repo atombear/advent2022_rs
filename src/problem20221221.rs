@@ -17,17 +17,15 @@ fn solve(var: &String,
          determined: &mut HashMap<String, i64>) -> i64 {
     if !determined.contains_key(var) {
         let expr = &undetermined.get(var).unwrap();
-        let v0: &String = &expr.v0;
-        let v1: &String = &expr.v1;
 
-        let i0: i64 = solve(v0, undetermined, determined);
-        let i1: i64 = solve(v1, undetermined, determined);
+        let v0: i64 = solve(&expr.v0, undetermined, determined);
+        let v1: i64 = solve(&expr.v1, undetermined, determined);
 
         let val: i64 = match expr.op {
-            '*' => { i0 * i1 },
-            '-' => { i0 - i1 },
-            '+' => { i0 + i1 },
-            '/' => { i0 / i1 },
+            '*' => { v0 * v1 },
+            '-' => { v0 - v1 },
+            '+' => { v0 + v1 },
+            '/' => { v0 / v1 },
             _ => panic!(),
         };
         determined.insert(var.to_string(), val);
@@ -93,7 +91,6 @@ fn unwrap_once(expr: &String) -> (String, char, String) {
 
 
 fn unwrap(val: i64, expr: &String) -> i64 {
-
     let mut val = val;
     let mut expr = expr;
 
@@ -163,12 +160,9 @@ pub fn problem() -> (usize, u64, u64) {
                         determined_sym.insert(key.to_string(), expr);
                     },
                     Err(_e) => {
-                        for op in ['*', '/', '-', '+'] {
-                            if expr.contains(op) {
-                                let expr_copy: String = expr.clone();
-                                let vals: Vec<&str> = expr_copy.split(&format!(" {} ", op)).collect();
-                                undetermined.insert(key.to_string(), Expr { v0: vals[0].to_string(), v1: vals[1].to_string(), op });
-                            }
+                        for op in ['*', '/', '-', '+'].iter().filter(|op| expr.contains(**op)) {
+                            let vals: Vec<&str> = expr.split(&format!(" {} ", *op)).collect();
+                            undetermined.insert(key.to_string(), Expr { v0: vals[0].to_string(), v1: vals[1].to_string(), op: *op });
                         }
                     },
                 }
