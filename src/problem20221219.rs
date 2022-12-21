@@ -7,6 +7,10 @@ use fancy_regex::Regex;
 
 use crate::utils::read_lines;
 
+
+type RobotArray = [u64; 4];
+
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct Resources {
     ore: u64,
@@ -24,6 +28,7 @@ struct BluePrint {
     geode_robot: (u64, u64),
 }
 
+
 #[derive(Debug)]
 enum RobotType {
     ORE,
@@ -33,7 +38,7 @@ enum RobotType {
 }
 
 
-type CacheKey = (u64, Resources, [u64; 4]);
+type CacheKey = (u64, Resources, RobotArray);
 
 
 impl fmt::Display for RobotType {
@@ -62,8 +67,8 @@ fn extract_value_from_regex(re: Regex, word: &String) -> u64 {
 fn parse_bp(bp_str: &String) -> BluePrint {
     let mut bp: BluePrint = BluePrint { ore_robot: 0, clay_robot: 0, obsidian_robot: (0, 0), geode_robot: (0, 0) };
 
-    let re_clay = Regex::new(&format!(r"(?<=and )\d+(?= clay.)")).unwrap();
-    let re_obsidian = Regex::new(&format!(r"(?<=and )\d+(?= obsidian.)")).unwrap();
+    let re_clay: Regex = Regex::new(&format!(r"(?<=and )\d+(?= clay.)")).unwrap();
+    let re_obsidian: Regex = Regex::new(&format!(r"(?<=and )\d+(?= obsidian.)")).unwrap();
 
     let clay_amnt: u64 = extract_value_from_regex(re_clay, bp_str);
     let obsidian_amnt: u64 = extract_value_from_regex(re_obsidian, bp_str);
@@ -71,7 +76,7 @@ fn parse_bp(bp_str: &String) -> BluePrint {
     let mut ore_amnt: u64;
     for robot in ALL_ROBOTS {
 
-        let re_ore = Regex::new(&format!(r"(?<=Each {} robot costs )\d+(?= ore.)", robot.to_string())).unwrap();
+        let re_ore: Regex = Regex::new(&format!(r"(?<=Each {} robot costs )\d+(?= ore.)", robot.to_string())).unwrap();
         ore_amnt = extract_value_from_regex(re_ore, bp_str);
 
         match robot {
@@ -91,7 +96,7 @@ fn ceil(a: u64, b: u64) -> u64 {
 }
 
 
-fn update_resources(resources: &mut Resources, robots: &[u64; 4], delta: u64) {
+fn update_resources(resources: &mut Resources, robots: &RobotArray, delta: u64) {
     resources.ore += delta * robots[0];
     resources.clay += delta * robots[1];
     resources.obsidian += delta * robots[2];
@@ -102,7 +107,7 @@ fn update_resources(resources: &mut Resources, robots: &[u64; 4], delta: u64) {
 fn run_blueprint_step(bp: &BluePrint,
                       time: u64,
                       resources: &Resources,
-                      robots: &[u64; 4],
+                      robots: &RobotArray,
                       max_ore: u64,
                       max_clay: u64,
                       max_obsidian: u64,
@@ -129,13 +134,13 @@ fn run_blueprint_step(bp: &BluePrint,
                                  ceil(bp.geode_robot.0 - resources.ore, robots[0]));
         }
         if time_delta <= time {
-            let mut new_resources = resources.clone();
+            let mut new_resources: Resources = resources.clone();
             update_resources(&mut new_resources, robots, time_delta);
             new_resources.ore -= bp.geode_robot.0;
             new_resources.obsidian -= bp.geode_robot.1;
 
-            let mut new_robots = robots.clone();
-            new_robots[3] += 1;
+            let new_robots: RobotArray = robots.clone();
+            new_resources.geode += time-time_delta;
             geodes.push(run_blueprint_step(bp, time-time_delta, &new_resources, &new_robots, max_ore, max_clay, max_obsidian, cache));
         }
     }
@@ -152,12 +157,12 @@ fn run_blueprint_step(bp: &BluePrint,
                                  ceil(bp.obsidian_robot.0 - resources.ore, robots[0]));
         }
         if time_delta <= time {
-            let mut new_resources = resources.clone();
+            let mut new_resources: Resources = resources.clone();
             update_resources(&mut new_resources, robots, time_delta);
             new_resources.ore -= bp.obsidian_robot.0;
             new_resources.clay -= bp.obsidian_robot.1;
 
-            let mut new_robots = robots.clone();
+            let mut new_robots: RobotArray = robots.clone();
             new_robots[2] += 1;
             geodes.push(run_blueprint_step(bp, time-time_delta, &new_resources, &new_robots, max_ore, max_clay, max_obsidian, cache));
         }
@@ -168,11 +173,11 @@ fn run_blueprint_step(bp: &BluePrint,
         else { time_delta = 1 + ceil(bp.clay_robot - resources.ore, robots[0]); }
 
         if time_delta <= time {
-            let mut new_resources = resources.clone();
+            let mut new_resources: Resources = resources.clone();
             update_resources(&mut new_resources, robots, time_delta);
             new_resources.ore -= bp.clay_robot;
 
-            let mut new_robots = robots.clone();
+            let mut new_robots: RobotArray = robots.clone();
             new_robots[1] += 1;
             geodes.push(run_blueprint_step(bp, time-time_delta, &new_resources, &new_robots, max_ore, max_clay, max_obsidian, cache));
         }
@@ -183,11 +188,11 @@ fn run_blueprint_step(bp: &BluePrint,
         else { time_delta = 1 + ceil(bp.ore_robot - resources.ore, robots[0]); }
 
         if time_delta <= time {
-            let mut new_resources = resources.clone();
+            let mut new_resources: Resources = resources.clone();
             update_resources(&mut new_resources, robots, time_delta);
             new_resources.ore -= bp.ore_robot;
 
-            let mut new_robots = robots.clone();
+            let mut new_robots: RobotArray = robots.clone();
             new_robots[0] += 1;
             geodes.push(run_blueprint_step(bp, time-time_delta, &new_resources, &new_robots, max_ore, max_clay, max_obsidian, cache));
         }
@@ -212,7 +217,7 @@ fn find_top3_prod(top3: Vec<BluePrint>) -> u64 {
         max_obsidian = bp.geode_robot.1;
 
         let resources: Resources = Resources { ore: 0, clay: 0, obsidian: 0, geode: 0 };
-        let robots: [u64; 4] = [1, 0, 0, 0];
+        let robots: RobotArray = [1, 0, 0, 0];
         let mut cache: HashMap<CacheKey, u64> = HashMap::new();
         ret *= run_blueprint_step(&bp, 32, &resources, &robots, max_ore, max_clay, max_obsidian, &mut cache);
     }
@@ -248,7 +253,7 @@ pub fn problem() -> (usize, u64, u64) {
                 max_obsidian = bp.geode_robot.1;
 
                 let resources: Resources = Resources { ore: 0, clay: 0, obsidian: 0, geode: 0 };
-                let robots: [u64; 4] = [1,0,0,0];
+                let robots: RobotArray = [1,0,0,0];
                 let mut cache: HashMap<CacheKey, u64> = HashMap::new();
                 max_geodes.push(run_blueprint_step(&bp, 24, &resources, &robots, max_ore, max_clay, max_obsidian, &mut cache));
             }
