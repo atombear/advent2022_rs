@@ -74,7 +74,7 @@ fn perform_move9001(mv: (u64, u64, u64), stacking: &mut Vec<Vec<char>>) {
 
 
 pub fn problem() -> (usize, String, String) {
-    let data_dir = env!("CARGO_MANIFEST_DIR").to_owned();
+    let data_dir: String = env!("CARGO_MANIFEST_DIR").to_owned();
     let data_path: PathBuf = [
         data_dir,
         "src".to_string(),
