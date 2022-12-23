@@ -52,7 +52,7 @@ fn get_score1(p0: char, p1: char) -> u64 {
 
 
 pub fn problem() -> (usize, u64, u64) {
-    let data_dir = env!("CARGO_MANIFEST_DIR").to_owned();
+    let data_dir: String = env!("CARGO_MANIFEST_DIR").to_owned();
     let data_path: PathBuf = [
         data_dir,
         "src".to_string(),

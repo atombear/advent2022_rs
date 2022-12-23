@@ -16,7 +16,7 @@ fn solve(var: &String,
          undetermined: &HashMap<String, Expr>,
          determined: &mut HashMap<String, i64>) -> i64 {
     if !determined.contains_key(var) {
-        let expr = &undetermined.get(var).unwrap();
+        let expr: &&Expr = &undetermined.get(var).unwrap();
 
         let v0: i64 = solve(&expr.v0, undetermined, determined);
         let v1: i64 = solve(&expr.v1, undetermined, determined);
@@ -39,7 +39,7 @@ fn solve_sym(var: &String,
              undetermined: &HashMap<String, Expr>,
              determined: &mut HashMap<String, String>) -> String {
     if !determined.contains_key(var) {
-        let expr = &undetermined.get(var).unwrap();
+        let expr: &&Expr = &undetermined.get(var).unwrap();
 
         let v0: String = solve_sym(&expr.v0, undetermined, determined);
         let v1: String = solve_sym(&expr.v1, undetermined, determined);
@@ -73,15 +73,15 @@ fn solve_sym(var: &String,
 
 
 fn unwrap_once(expr: &String) -> (String, char, String) {
-    let expr = &expr[1..expr.len()-1];
+    let expr: &str = &expr[1..expr.len()-1];
 
     let mut jdx: usize = 0;
     let mut parens: u64 = 0;
 
     for (idx, c) in expr.chars().enumerate() {
         if c == '(' { parens += 1; }
-        if c == ')' { parens -= 1; }
-        if (c == '*' || c == '-' || c == '/' || c == '+') && parens == 0 {
+        else if c == ')' { parens -= 1; }
+        else if (c == '*' || c == '-' || c == '/' || c == '+') && parens == 0 {
             jdx = idx;
             break
         }
@@ -91,8 +91,8 @@ fn unwrap_once(expr: &String) -> (String, char, String) {
 
 
 fn unwrap(val: i64, expr: &String) -> i64 {
-    let mut val = val;
-    let mut expr = expr;
+    let mut val: i64 = val;
+    let mut expr: &String = expr;
 
     let mut v0: String;
     let mut v1: String;
@@ -131,7 +131,7 @@ fn unwrap(val: i64, expr: &String) -> i64 {
 
 
 pub fn problem() -> (usize, u64, u64) {
-    let data_dir = env!("CARGO_MANIFEST_DIR").to_owned();
+    let data_dir: String = env!("CARGO_MANIFEST_DIR").to_owned();
     let data_path: PathBuf = [
         data_dir,
         "src".to_string(),

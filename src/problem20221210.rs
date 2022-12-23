@@ -32,7 +32,7 @@ fn complete_cycle(cycle_params: &mut CycleParams,
 
 
 pub fn problem() -> (usize, i64, String) {
-    let data_dir = env!("CARGO_MANIFEST_DIR").to_owned();
+    let data_dir: String = env!("CARGO_MANIFEST_DIR").to_owned();
     let data_path: PathBuf = [
         data_dir,
         "src".to_string(),
