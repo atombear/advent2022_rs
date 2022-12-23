@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
+use std::slice::Iter;
 
 use crate::utils::read_lines;
 
@@ -7,80 +8,59 @@ use crate::utils::read_lines;
 type Point = (i64, i64);
 
 
-fn check_north(elves: &HashSet<Point>, elf: &Point) -> bool {
-    let x: i64;
-    let y: i64;
-    (x, y) = *elf;
-    return !elves.contains(&(x-1, y+1)) && !elves.contains(&(x, y+1)) && !elves.contains(&(x+1, y+1))
+fn check_points(elves: &HashSet<Point>, elf: &Point, iter: &mut Iter<(i64, i64)>) -> bool {
+    !(iter.any(|(dx, dy)| elves.contains(&(elf.0+dx, elf.1+dy))))
 }
+
+
+fn check_north(elves: &HashSet<Point>, elf: &Point) -> bool { check_points(elves, elf,&mut [(-1,1),(0,1),(1,1)].iter()) }
 fn north(elf: &Point) -> Point { (elf.0, elf.1+1) }
 
 
-fn check_south(elves: &HashSet<Point>, elf: &Point) -> bool {
-    let x: i64;
-    let y: i64;
-    (x, y) = *elf;
-    return !elves.contains(&(x-1, y-1)) && !elves.contains(&(x, y-1)) && !elves.contains(&(x+1, y-1))
-}
+fn check_south(elves: &HashSet<Point>, elf: &Point) -> bool { check_points(elves, elf, &mut [(-1,-1),(0,-1),(1,-1)].iter()) }
 fn south(elf: &Point) -> Point { (elf.0, elf.1-1) }
 
 
-fn check_west(elves: &HashSet<Point>, elf: &Point) -> bool {
-    let x: i64;
-    let y: i64;
-    (x, y) = *elf;
-    return !elves.contains(&(x-1, y-1)) && !elves.contains(&(x-1, y)) && !elves.contains(&(x-1, y+1))
-}
+fn check_west(elves: &HashSet<Point>, elf: &Point) -> bool { check_points(elves, elf, &mut [(-1,-1),(-1,0),(-1,1)].iter()) }
 fn west(elf: &Point) -> Point { (elf.0-1, elf.1) }
 
 
-fn check_east(elves: &HashSet<Point>, elf: &Point) -> bool {
-    let x: i64;
-    let y: i64;
-    (x, y) = *elf;
-    return !elves.contains(&(x+1, y-1)) && !elves.contains(&(x+1, y)) && !elves.contains(&(x+1, y+1))
-}
+fn check_east(elves: &HashSet<Point>, elf: &Point) -> bool { check_points(elves, elf, &mut [(1,-1),(1,0),(1,1)].iter()) }
 fn east(elf: &Point) -> Point { (elf.0+1, elf.1) }
 
 
 const CHECK: [fn(&HashSet<Point>, &Point) -> bool; 4] = [check_north, check_south, check_west, check_east];
 const MOVE: [fn(&Point) -> Point; 4] = [north, south, west, east];
+const SURROUNDING_DELTAS: [(i64, i64); 8] = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)];
 
 
 fn all_clear(elves: &HashSet<Point>, elf: &Point) -> bool {
-    let x: i64;
-    let y: i64;
-    (x, y) = *elf;
-    for (dx, dy) in [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)] {
-        if elves.contains(&(x+dx, y+dy)) { return false }
-    }
-    return true
+    return SURROUNDING_DELTAS
+        .iter()
+        .all(|(dx, dy)| !elves.contains(&(elf.0+dx, elf.1+dy)))
 }
 
 fn propose(elves: &HashSet<Point>, proposal: &mut HashMap<Point, Vec<Point>>, cycle: usize) {
-    let mut new_point: Point = (1000000, 1000000);
+    let default_state: (bool, Point) = (false, (1000000, 1000000));
+    let mut new_point: Point;
     let mut can_move: bool;
-    let mut cycle_idx: usize;
 
     for elf in elves {
-        can_move = false;
-        if !all_clear(elves, elf) {
-            for idx in 0..4 {
-                cycle_idx = (idx + cycle) % 4;
-                if (CHECK[cycle_idx])(elves, elf) {
-                    new_point = (MOVE[cycle_idx])(elf);
-                    can_move = true;
-                    break
-                }
-            }
-        }
+        (can_move, new_point) = if all_clear(elves, elf) {
+            default_state
+        } else {
+            (0..4)
+                .map(|idx|
+                ((CHECK[(idx + cycle) % 4])(elves, elf),
+                 (MOVE[(idx + cycle) % 4])(elf)))
+                .filter(|(check, _)| *check)
+                .next()
+                .unwrap_or(default_state)
+        };
 
         if can_move {
-            if proposal.contains_key(&new_point) {
-                proposal.get_mut(&new_point).unwrap().push(*elf)
-            } else {
-                proposal.insert(new_point, vec![*elf]);
-            }
+            if !proposal.contains_key(&new_point) { proposal.insert(new_point, vec![]); }
+            proposal.get_mut(&new_point).unwrap().push(*elf)
         }
     }
 }
@@ -117,7 +97,7 @@ pub fn problem() -> (usize, u64, u64) {
 
     all_lines.reverse();
     for (idx, line) in all_lines.iter().enumerate() {
-        for (jdx, c) in line.chars().enumerate().filter(|(_, c)| c == &'#') {
+        for jdx in line.chars().enumerate().filter(|(_, c)| c == &'#').map(|(jdx, _)| jdx) {
             elves.insert((jdx as i64, idx as i64));
         }
     }
